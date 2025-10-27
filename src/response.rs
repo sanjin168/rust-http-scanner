@@ -1,5 +1,7 @@
 use std::fmt::Display;
+use serde::Serialize;
 
+#[derive(Serialize)]
 pub struct Response {
     pub url: String,
     pub status_code: u16,

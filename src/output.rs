@@ -1,21 +1,51 @@
-// use std::fs;
+use std::fs::{self, File};
+use std::io::{BufWriter, Write};
+use std::path::Path;
 
 use crate::response::Response;
 use crate::utils::generate_timestamp_filename;
 
-pub fn _output_to_txt(_res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
-    let filename = generate_timestamp_filename("txt");
-    Ok(filename)
+const OUTPUT_DIR: &str = "output";
+
+pub fn output_to_txt(res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
+    fs::create_dir_all(OUTPUT_DIR)?;
+    let basename = generate_timestamp_filename("txt");
+    let filepath = Path::new(OUTPUT_DIR).join(basename);
+    let file = File::create(&filepath)?;
+    let mut writer = BufWriter::new(file);
+
+    for r in res {
+        writeln!(writer, "{}  {}  {}  {}", r.status_code, r.content_length, r.url, r.title)?;
+    }
+
+    writer.flush()?;
+
+    Ok(filepath.to_string_lossy().into_owned())
 }
 
-pub fn _output_to_csv(_res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
+pub fn output_to_csv(res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
+    fs::create_dir_all(OUTPUT_DIR)?;
+    let basename = generate_timestamp_filename("csv");
+    let filepath = Path::new(OUTPUT_DIR).join(basename);
+    let mut wtr = csv::Writer::from_path(&filepath)?;
 
-    let filename = generate_timestamp_filename("csv");
-    Ok(filename)
+    for r in res {
+        wtr.serialize(r)?;
+    }
+
+    wtr.flush()?;
+
+    Ok(filepath.to_string_lossy().into_owned())
 }
 
-pub fn _output_to_json(_res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
+pub fn output_to_json(res: &Vec<Response>) -> Result<String, Box<dyn std::error::Error>> {
+    fs::create_dir_all(OUTPUT_DIR)?;
+    let basename = generate_timestamp_filename("json");
+    let filepath = Path::new(OUTPUT_DIR).join(basename);
+    let file = File::create(&filepath)?;
+    let mut writer = BufWriter::new(file);
 
-    let filename = generate_timestamp_filename("json");
-    Ok(filename)
+    serde_json::to_writer_pretty(writer, res)?;
+
+    Ok(filepath.to_string_lossy().into_owned())
 }

@@ -50,5 +50,5 @@ pub fn parse_title(html_content: &str) -> Result<Option<String>, Box<dyn std::er
 pub fn generate_timestamp_filename(extension: &str) -> String {
     let now = Local::now();
     let timestamp = now.format("%Y-%m-%d_%H-%M-%S").to_string();
-    format!("results_{}.{}", timestamp, extension)
+    format!("result_{}.{}", timestamp, extension)
 }
